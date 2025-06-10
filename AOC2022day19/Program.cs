@@ -6,7 +6,7 @@ class Program
     {
         (int, int) max = (-1, -1);
 
-        string[] input = Utils.OpenFile(args[1]);
+        string[] input = Utils.OpenFile("../../../inputs/input_diamond.txt");
         Blueprint[] blueprints = Utils.Parse(input);
         foreach (Blueprint blueprint in blueprints)
         {

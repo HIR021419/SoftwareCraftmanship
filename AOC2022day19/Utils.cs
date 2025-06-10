@@ -19,7 +19,7 @@ public static class Utils
 
     public static Blueprint[] Parse(string[] input)
     {
-        Regex rx = new Regex(@"^.*(\d+).*(\d+).*(\d+).*(\d+).*(\d+).*(\d+).*(\d+).*(\d+).*(\d+).*(\d+).*",
+        Regex rx = new Regex(@"^.*(\d+).*(\d+).*(\d+).*(\d+).*(\d+).*(\d+).*(\d+).*(\d+).*(\d+).*(\d+).*$",
             RegexOptions.Compiled);
         List<Blueprint> blueprints = new List<Blueprint>();
         foreach (string line in input)
