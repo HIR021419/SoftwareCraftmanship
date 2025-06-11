@@ -8,13 +8,16 @@ class Program
 
         string[] input = Utils.OpenFile("../../../inputs/input_diamond.txt");
         Blueprint[] blueprints = Utils.Parse(input);
+
+        List<(int, int)> results = new();
         foreach (Blueprint blueprint in blueprints)
         {
             int res = TestBlueprint(blueprint);
-            if (res > max.Item2) max = (blueprint.Index, res);
+            results.Add((blueprint.Index, res));
         }
-        
-        Console.WriteLine(max.Item1);
+
+        Response response = new Response(results.ToArray());
+        Utils.WriteOutput(response);
     }
 
     static int TestBlueprint(Blueprint blueprint)

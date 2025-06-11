@@ -17,6 +17,18 @@ public static class Utils
         }
     }
 
+    public static void WriteOutput(Response response, string inputPath = "./analysis.txt")
+    {
+        File.WriteAllText(inputPath, ""); 
+        
+        foreach (BlueprintResponse blueprint in response.blueprints)
+        {
+            File.AppendAllText(inputPath, $"Blueprint {blueprint.id}: {blueprint.quality}" + Environment.NewLine);
+        }
+        
+        File.AppendAllText(inputPath, Environment.NewLine + $"Best blueprint is the blueprint {response.bestBlueprint}." + Environment.NewLine);
+    }
+
     public static Blueprint[] Parse(string[] input)
     {
         Regex rx = new Regex(@"^.*(\d+).*(\d+).*(\d+).*(\d+).*(\d+).*(\d+).*(\d+).*(\d+).*(\d+).*(\d+).*$",
