@@ -1,3 +1,3 @@
 export class ParseBlueprintsInputDto {
-    lines: string[];
+  lines: string[];
 }

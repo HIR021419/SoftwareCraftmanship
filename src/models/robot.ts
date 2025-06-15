@@ -1,4 +1,4 @@
-import { State } from './State.js';
+import { State } from './state';
 
 export class Robot {
   mineralIndex: number;

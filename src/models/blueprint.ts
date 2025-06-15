@@ -1,4 +1,4 @@
-import { Robot } from './Robot.js';
+import { Robot } from './robot';
 
 export class Blueprint {
   constructor(

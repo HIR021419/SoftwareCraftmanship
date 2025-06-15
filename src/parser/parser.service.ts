@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { ParseBlueprintsInputDto } from './dto/parse-blueprints-input.dto';
-import { Blueprint } from '../models/Blueprint';
+import { Blueprint } from '../models/blueprint';
 
 @Injectable()
 export class ParserService {
