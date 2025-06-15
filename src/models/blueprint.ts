@@ -6,10 +6,6 @@ export class Blueprint {
     public robotCosts: number[][],
   ) {}
 
-  static fromParsed(index: number, robotCosts: number[][]): Blueprint {
-    return new Blueprint(index, robotCosts);
-  }
-
   get robots(): Robot[] {
     return this.robotCosts.map(
       (cost, mineralIndex) => new Robot(mineralIndex, cost),

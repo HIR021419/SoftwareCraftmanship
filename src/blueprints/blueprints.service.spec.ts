@@ -1,11 +1,11 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { ComputeService } from './compute.service';
+import { BlueprintsService } from './blueprints.service';
 import { ParserService } from '../parser/parser.service';
 import { Blueprint } from '../models/blueprint';
 import { State } from '../models/state';
 
-describe('ComputeService', () => {
-  let service: ComputeService;
+describe('BlueprintsService', () => {
+  let service: BlueprintsService;
   let parserService: ParserService;
 
   // Mock minimal Blueprint & Robot behavior
@@ -34,7 +34,7 @@ describe('ComputeService', () => {
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
-        ComputeService,
+        BlueprintsService,
         {
           provide: ParserService,
           useValue: {
@@ -44,7 +44,7 @@ describe('ComputeService', () => {
       ],
     }).compile();
 
-    service = module.get<ComputeService>(ComputeService);
+    service = module.get<BlueprintsService>(BlueprintsService);
     parserService = module.get<ParserService>(ParserService);
   });
 

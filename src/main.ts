@@ -23,6 +23,8 @@ async function bootstrap() {
     customSiteTitle: 'Software Craftsmanship',
   });
 
+  app.
+
   await app.listen(process.env.PORT ?? 3000);
 }
 bootstrap();

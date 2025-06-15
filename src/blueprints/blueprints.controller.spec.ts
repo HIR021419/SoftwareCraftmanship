@@ -1,11 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { ComputeController } from './compute.controller';
-import { ComputeService } from './compute.service';
-import { ComputeRequestDto } from './dto/compute-request.dto';
+import { BlueprintsController } from './blueprints.controller';
+import { BlueprintsService } from './blueprints.service';
 
-describe('ComputeController', () => {
-  let controller: ComputeController;
-  let computeService: ComputeService;
+describe('BlueprintsController', () => {
+  let controller: BlueprintsController;
+  let computeService: BlueprintsService;
 
   beforeEach(async () => {
     const mockComputeService = {
@@ -13,17 +12,17 @@ describe('ComputeController', () => {
     };
 
     const module: TestingModule = await Test.createTestingModule({
-      controllers: [ComputeController],
+      controllers: [BlueprintsController],
       providers: [
         {
-          provide: ComputeService,
+          provide: BlueprintsService,
           useValue: mockComputeService,
         },
       ],
     }).compile();
 
-    controller = module.get<ComputeController>(ComputeController);
-    computeService = module.get<ComputeService>(ComputeService);
+    controller = module.get<BlueprintsController>(BlueprintsController);
+    computeService = module.get<BlueprintsService>(BlueprintsService);
   });
 
   it('should be defined', () => {
@@ -31,7 +30,7 @@ describe('ComputeController', () => {
   });
 
   describe('compute', () => {
-    it('should call computeService.compute with the correct DTO and return result', () => {
+    it('should call computeService.blueprints with the correct DTO and return result', () => {
       const dto: ComputeRequestDto = { input: 'some input data' };
       const mockResult = [42, 84, 126];
 

@@ -23,7 +23,7 @@ export class ParserService {
 
       const robotCosts = [oreCost, clayCost, obsidianCost, geodeCost];
 
-      blueprints.push(Blueprint.fromParsed(index, robotCosts));
+      blueprints.push(new Blueprint(index, robotCosts));
     }
 
     return blueprints;
