@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { ConsoleLogger, Injectable } from '@nestjs/common';
 import { ParserService } from '../parser/parser.service';
 import { Blueprint } from '../models/blueprint';
 import * as fs from 'fs';
@@ -6,6 +6,7 @@ import * as path from 'path';
 import { State } from '../models/state';
 import { ResponseDto, ResultDto } from './dto/Response.dto';
 import { FileService } from '../file/file.service';
+import * as process from 'node:process';
 
 @Injectable()
 export class BlueprintsService {
@@ -15,7 +16,7 @@ export class BlueprintsService {
   ) {}
 
   public async analyzeBlueprints() {
-    const inputPath = path.join(__dirname, 'input_diamond.txt');
+    const inputPath = process.env.INPUT ?? "inputs/input.txt";
     const inputData = await this.fileService.readFileAsInput(inputPath);
 
     const blueprints: Blueprint[] = this.parserService.parse(inputData);
@@ -32,7 +33,7 @@ export class BlueprintsService {
 
     const response = new ResponseDto(bestBlueprint.id, results);
     await this.fileService.writeTextToFile(
-      path.join(__dirname, 'output.txt'),
+      process.env.OUTPUT ?? "./analysis.txt",
       response.asString(),
     );
 
@@ -43,12 +44,14 @@ export class BlueprintsService {
     let currentStates: State[] = [new State()];
     let previousStates: State[] = [];
 
+    const robots = blueprint.robots;
+
     for (let i = 0; i < 24; i++) {
       previousStates = [...currentStates];
       const newStates: State[] = [];
 
       for (const state of previousStates) {
-        for (const robot of blueprint.robots) {
+        for (const robot of robots) {
           const newState = robot.addRobot(state);
           if (newState) newStates.push(newState);
         }
@@ -56,16 +59,25 @@ export class BlueprintsService {
       }
 
       newStates.forEach((state) => state.mineResources());
-      newStates.sort((a, b) => b.getResource(4) - a.getResource(4));
-      const MAX_STATES = 10000;
+      newStates.sort(this.sortFunction);
+      const MAX_STATES = 1000; // Prune useless states
       currentStates = newStates.slice(0, MAX_STATES);
     }
 
-    return blueprint.index * this.getMax(currentStates);
+    return blueprint.index * currentStates[0].resources[4];
   }
 
-  private getMax(states: State[]): number {
-    if (states.length === 0) return 0;
-    return Math.max(...states.map((s) => s.getResource(4)));
+  private sortFunction(a: State, b: State): number {
+    let diamondsDiff = b.getResource(4) - a.getResource(4);
+    if (diamondsDiff != 0) return diamondsDiff;
+    for (let i = a.robots.length - 1; i >= 0; i--) {
+      let diff: number = b.robots[i] - a.robots[i];
+      if (diff != 0) return diff;
+    }
+    for (let i: number = a.resources.length - 1; i >= 0; i--) {
+      let diff: number = b.getResource(i) - a.getResource(i);
+      if (diff != 0) return diff;
+    }
+    return 0;
   }
 }

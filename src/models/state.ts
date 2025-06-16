@@ -18,6 +18,18 @@ export class State {
   }
 
   clone(): State {
-    return new State(this.resources, this.robots);
+    return new State(this.resources.slice(), this.robots.slice());
+  }
+
+  toString(): string {
+    let res = "robots "
+    for (let i = 0; i < this.robots.length; i++) {
+      res += `${i}: ${this.robots[i]}; `
+    }
+    res += "\nresources "
+    for (let i = 0; i < this.resources.length; i++) {
+      res += `${i}: ${this.resources[i]}; `
+    }
+    return res;
   }
 }

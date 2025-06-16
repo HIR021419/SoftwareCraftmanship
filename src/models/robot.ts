@@ -10,15 +10,16 @@ export class Robot {
   }
 
   addRobot(state: State): State | null {
+    if (!this.canBuild(state)) return null;
     const newState = state.clone();
-
-    if (!this.canBuild(newState)) return null;
 
     for (let i = 0; i < this.cost.length; i++) {
       newState.resources[i] -= this.cost[i];
     }
 
     newState.robots[this.mineralIndex]++;
+    newState.resources[this.mineralIndex]--; // compensate 1-min delay before build
+
     return newState;
   }
 

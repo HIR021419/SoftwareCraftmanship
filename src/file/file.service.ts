@@ -1,4 +1,4 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import * as fs from 'fs/promises';
 import { ParseBlueprintsInputDto } from '../parser/dto/parse-blueprints-input.dto';
 
@@ -19,7 +19,7 @@ export class FileService {
       return { lines: content.split('\n') };
     } catch (err) {
       console.error(`Error reading file at ${filePath}:`, err);
-      throw new InternalServerErrorException(); // No message, keep our secrets.
+      throw new NotFoundException("No file to analyze");
     }
   }
 }

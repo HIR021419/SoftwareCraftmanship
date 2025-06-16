@@ -1,10 +1,16 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import { ValidationPipe } from '@nestjs/common';
+import { ConsoleLogger, ValidationPipe } from '@nestjs/common';
+import * as dotenv from 'dotenv';
+import { SwaggerTheme, SwaggerThemeNameEnum } from 'swagger-themes';
+
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+
+  const logger = new ConsoleLogger('Main');
+  dotenv.config();
 
   app.useGlobalPipes(new ValidationPipe());
 
@@ -14,17 +20,20 @@ async function bootstrap() {
       'Public REST API for the Software Craftsmanship course, MTI 2026.',
     )
     .setVersion('0.1')
-    .addBearerAuth()
     .build();
+
+  const theme = new SwaggerTheme();
 
   const document = SwaggerModule.createDocument(app, swaggerConfig);
 
   SwaggerModule.setup('api', app, document, {
+    customCss: theme.getBuffer(SwaggerThemeNameEnum.DARK),
     customSiteTitle: 'Software Craftsmanship',
   });
 
-  app.
+  const port: number   = Number(process.env.PORT) || 3000;
+  await app.listen(port);
 
-  await app.listen(process.env.PORT ?? 3000);
+  logger.log(`🚀 Swagger available at http://localhost:${port}/api`);
 }
 bootstrap();
