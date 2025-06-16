@@ -25,7 +25,11 @@ export class ResponseDto {
   }
 
   asString() {
-    // FIXME
-    return '';
+    let res = ""
+    for (const result of this.results) {
+      res += `Blueprint ${result.id}: ${result.quality}\n`;
+    }
+    res += `\nBest blueprint is the blueprint ${this.bestBlueprint}.\n`;
+    return res;
   }
 }
