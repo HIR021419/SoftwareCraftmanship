@@ -1,6 +1,6 @@
 .env
 
-srcbad
+config.yaml
 
 package-lock.json
 

@@ -1,11 +1,11 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { ParseBlueprintsInputDto } from './dto/parse-blueprints-input.dto';
-import { Blueprint } from '../models/blueprint';
+import { BlueprintDto } from '../blueprints/dto/BlueprintDto';
 
 @Injectable()
 export class ParserService {
-  parse(input: ParseBlueprintsInputDto): Blueprint[] {
-    const blueprints: Blueprint[] = [];
+  parse(input: ParseBlueprintsInputDto): BlueprintDto[] {
+    const blueprints: BlueprintDto[] = [];
 
     for (const line of input.lines) {
       if (line.trim() === '') continue;
@@ -21,11 +21,23 @@ export class ParserService {
       const clayCost = [parseInt(match[3]), 0, 0, 0, 0];
       const obsidianCost = [parseInt(match[4]), parseInt(match[5]), 0, 0, 0];
       const geodeCost = [parseInt(match[6]), 0, parseInt(match[7]), 0, 0];
-      const diamondCost = [0, parseInt(match[9]), parseInt(match[10]), parseInt(match[8]), 0];
+      const diamondCost = [
+        0,
+        parseInt(match[9]),
+        parseInt(match[10]),
+        parseInt(match[8]),
+        0,
+      ];
 
-      const robotCosts = [oreCost, clayCost, obsidianCost, geodeCost, diamondCost];
+      const robotCosts = [
+        oreCost,
+        clayCost,
+        obsidianCost,
+        geodeCost,
+        diamondCost,
+      ];
 
-      blueprints.push(new Blueprint(index, robotCosts));
+      blueprints.push(new BlueprintDto(index, robotCosts));
     }
 
     return blueprints;

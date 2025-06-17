@@ -2,15 +2,16 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ConsoleLogger, ValidationPipe } from '@nestjs/common';
-import * as dotenv from 'dotenv';
 import { SwaggerTheme, SwaggerThemeNameEnum } from 'swagger-themes';
-
+import { ConfigService } from '@nestjs/config';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+  const configService = app.get(ConfigService);
+  const appConfig = configService.get<AppConfig>('app');
+
   const logger = new ConsoleLogger('Main');
-  dotenv.config();
 
   app.useGlobalPipes(new ValidationPipe());
 
@@ -31,7 +32,7 @@ async function bootstrap() {
     customSiteTitle: 'Software Craftsmanship',
   });
 
-  const port: number   = Number(process.env.PORT) || 3000;
+  const port: number = Number(process.env.PORT) || 3000;
   await app.listen(port);
 
   logger.log(`🚀 Swagger available at http://localhost:${port}/api`);
