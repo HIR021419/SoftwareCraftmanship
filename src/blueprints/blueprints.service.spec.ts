@@ -1,35 +1,27 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { BlueprintsService } from './blueprints.service';
 import { ParserService } from '../parser/parser.service';
-import { Blueprint } from '../blueprints-analysis/models/blueprint';
-import { State } from '../blueprints-analysis/models/state';
+import { FileService } from '../file/file.service';
+import { ConfigService } from '@nestjs/config';
+import { BlueprintsAnalysisService } from '../blueprints-analysis/blueprints-analysis.service';
+import { BlueprintDto } from './dto/BlueprintDto';
+import { ResultDto } from './dto/Response.dto';
 
 describe('BlueprintsService', () => {
   let service: BlueprintsService;
   let parserService: ParserService;
+  let fileService: FileService;
+  let configService: ConfigService;
+  let analysisService: BlueprintsAnalysisService;
 
-  // Mock minimal Blueprint & Robot behavior
-  const mockBlueprint: Blueprint = new Blueprint(1, [
-    [1, 0, 0, 0, 0],
-    [0, 1, 0, 0, 0],
-  ]);
-  // Mock the robots getter to return robots with stubbed addRobot method
-  jest.spyOn(mockBlueprint, 'robots', 'get').mockReturnValue([
-    {
-      addRobot: jest.fn().mockImplementation((state: State) => {
-        const newState = state.clone();
-        newState.resources[0] = Math.max(0, newState.resources[0] - 1);
-        return newState;
-      }),
-    } as any,
-    {
-      addRobot: jest.fn().mockImplementation((state: State) => {
-        const newState = state.clone();
-        newState.resources[1] = Math.max(0, newState.resources[1] - 1);
-        return newState;
-      }),
-    } as any,
-  ]);
+  const mockBlueprints: BlueprintDto[] = [
+    new BlueprintDto(1, [
+      [1, 0, 0, 0],
+      [0, 1, 0, 0],
+    ]),
+  ];
+
+  const mockResults: ResultDto[] = [new ResultDto(1, 10)];
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -38,7 +30,33 @@ describe('BlueprintsService', () => {
         {
           provide: ParserService,
           useValue: {
-            parse: jest.fn().mockReturnValue([mockBlueprint]),
+            parse: jest.fn().mockReturnValue(mockBlueprints),
+          },
+        },
+        {
+          provide: FileService,
+          useValue: {
+            readFileAsInput: jest
+              .fn()
+              .mockResolvedValue({ lines: ['some', 'lines'] }),
+            writeTextToFile: jest.fn().mockResolvedValue(undefined),
+          },
+        },
+        {
+          provide: BlueprintsAnalysisService,
+          useValue: {
+            testBlueprint: jest.fn().mockImplementation((bp: BlueprintDto) => {
+              return mockResults.find((r) => r.id === bp.index)?.quality ?? 0;
+            }),
+          },
+        },
+        {
+          provide: ConfigService,
+          useValue: {
+            get: jest.fn().mockReturnValue({
+              input_path: 'input.txt',
+              output_path: 'output.txt',
+            }),
           },
         },
       ],
@@ -46,72 +64,46 @@ describe('BlueprintsService', () => {
 
     service = module.get<BlueprintsService>(BlueprintsService);
     parserService = module.get<ParserService>(ParserService);
+    fileService = module.get<FileService>(FileService);
+    configService = module.get<ConfigService>(ConfigService);
+    analysisService = module.get<BlueprintsAnalysisService>(
+      BlueprintsAnalysisService,
+    );
   });
 
   it('should be defined', () => {
     expect(service).toBeDefined();
   });
 
-  describe('compute', () => {
-    it('should read input from dto and parse blueprints', () => {
-      const dto = { input: 'line1\nline2\nline3' };
-      const parseSpy = jest.spyOn(parserService, 'parse');
-      const results = service.compute(dto).results;
+  describe('analyzeBlueprints', () => {
+    it('should parse input, analyze blueprints, write to file and return response', async () => {
+      const response = await service.analyzeBlueprints();
 
-      expect(parseSpy).toHaveBeenCalledWith({
-        lines: ['line1', 'line2', 'line3'],
+      expect(fileService.readFileAsInput).toHaveBeenCalledWith('input.txt');
+      expect(parserService.parse).toHaveBeenCalledWith({
+        lines: ['some', 'lines'],
       });
-      expect(Array.isArray(results)).toBe(true);
-      expect(results.length).toBeGreaterThan(0);
-    });
+      expect(analysisService.testBlueprint).toHaveBeenCalledTimes(
+        mockBlueprints.length,
+      );
+      expect(fileService.writeTextToFile).toHaveBeenCalledWith(
+        'output.txt',
+        expect.stringContaining('Blueprint 1: 10'),
+      );
 
-    it('should read input from file if dto.input is empty', () => {
-      // Mock fs.readFileSync to avoid real file access
-      jest
-        .spyOn(require('fs'), 'readFileSync')
-        .mockReturnValue('fileline1\nfileline2');
-      const dto = { input: '' };
-      const parseSpy = jest.spyOn(parserService, 'parse');
-      const results = service.compute(dto).results;
-
-      expect(parseSpy).toHaveBeenCalledWith({
-        lines: ['fileline1', 'fileline2'],
-      });
-      expect(results.length).toBeGreaterThan(0);
-    });
-  });
-
-  describe('processBlueprints', () => {
-    it('should return a Response with results', () => {
-      const blueprints = [mockBlueprint];
-      const response = service.processBlueprints(blueprints);
-
+      expect(response.bestBlueprint).toBe(1);
       expect(response.results.length).toBe(1);
-      expect(response.results[0].index).toBe(mockBlueprint.index);
-      expect(typeof response.results[0].result).toBe('number');
-    });
-  });
-
-  describe('private methods', () => {
-    it('testBlueprint returns a number based on blueprint index and states', () => {
-      // testBlueprint is private, but processBlueprints calls it, so we test indirectly
-      const blueprints = [mockBlueprint];
-      const response = service.processBlueprints(blueprints);
-
-      expect(typeof response.results[0].result).toBe('number');
+      expect(response.results[0].id).toBe(1);
+      expect(response.results[0].quality).toBe(10);
     });
 
-    it('getMax returns max resource count or 0 if empty', () => {
-      const getMax = (service as any).getMax.bind(service);
+    it('should handle empty results gracefully', async () => {
+      (parserService.parse as jest.Mock).mockReturnValueOnce([]);
 
-      const statesWithResources = [
-        { getResource: () => 2 },
-        { getResource: () => 5 },
-        { getResource: () => 3 },
-      ];
-      expect(getMax(statesWithResources)).toBe(5);
+      const response = await service.analyzeBlueprints();
 
-      expect(getMax([])).toBe(0);
+      expect(response.bestBlueprint).toBe(-1);
+      expect(response.results.length).toBe(0);
     });
   });
 });

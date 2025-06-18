@@ -2,13 +2,14 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { ParserService } from './parser.service';
 import { BadRequestException } from '@nestjs/common';
 import { ParseBlueprintsInputDto } from './dto/parse-blueprints-input.dto';
+import { RobotCostParser } from './robot-cost.parser';
 
 describe('ParserService', () => {
   let service: ParserService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [ParserService],
+      providers: [ParserService, RobotCostParser],
     }).compile();
 
     service = module.get<ParserService>(ParserService);
@@ -22,7 +23,7 @@ describe('ParserService', () => {
     it('should parse valid blueprint lines correctly', () => {
       const input: ParseBlueprintsInputDto = {
         lines: [
-          'Blueprint 1: Each ore robot costs 4 ore. Each clay robot costs 2 ore. Each obsidian robot costs 3 ore and 14 clay. Each geode robot costs 2 ore and 7 obsidian.',
+          'Blueprint 1: Each ore robot costs 4 ore. Each clay robot costs 2 ore. Each obsidian robot costs 3 ore and 14 clay. Each geode robot costs 2 ore and 7 obsidian. Each diamond robot costs 7 geode and 8 obsidian.',
         ],
       };
 
@@ -36,6 +37,7 @@ describe('ParserService', () => {
         [2, 0, 0, 0, 0], // clay robot
         [3, 14, 0, 0, 0], // obsidian robot
         [2, 0, 7, 0, 0], // geode robot
+        [0, 0, 8, 7, 0],
       ]);
     });
 

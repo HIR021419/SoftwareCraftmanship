@@ -1,14 +1,15 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { BlueprintsController } from './blueprints.controller';
 import { BlueprintsService } from './blueprints.service';
+import { ResponseDto, ResultDto } from './dto/Response.dto';
 
 describe('BlueprintsController', () => {
   let controller: BlueprintsController;
-  let computeService: BlueprintsService;
+  let blueprintsService: BlueprintsService;
 
   beforeEach(async () => {
-    const mockComputeService = {
-      compute: jest.fn(),
+    const mockService = {
+      analyzeBlueprints: jest.fn(),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -16,30 +17,34 @@ describe('BlueprintsController', () => {
       providers: [
         {
           provide: BlueprintsService,
-          useValue: mockComputeService,
+          useValue: mockService,
         },
       ],
     }).compile();
 
     controller = module.get<BlueprintsController>(BlueprintsController);
-    computeService = module.get<BlueprintsService>(BlueprintsService);
+    blueprintsService = module.get<BlueprintsService>(BlueprintsService);
   });
 
   it('should be defined', () => {
     expect(controller).toBeDefined();
   });
 
-  describe('compute', () => {
-    it('should call computeService.blueprints with the correct DTO and return result', () => {
-      const dto: ComputeRequestDto = { input: 'some input data' };
-      const mockResult = [42, 84, 126];
+  describe('analyze', () => {
+    it('should return analysis result from service', async () => {
+      const mockResponse = new ResponseDto(1, [
+        new ResultDto(1, 10),
+        new ResultDto(2, 7),
+      ]);
 
-      (computeService.compute as jest.Mock).mockReturnValue(mockResult);
+      (blueprintsService.analyzeBlueprints as jest.Mock).mockResolvedValue(
+        mockResponse,
+      );
 
-      const result = controller.compute(dto);
+      const result = await controller.analyze();
 
-      expect(computeService.compute).toHaveBeenCalledWith(dto);
-      expect(result).toBe(mockResult);
+      expect(blueprintsService.analyzeBlueprints).toHaveBeenCalled();
+      expect(result).toBe(mockResponse);
     });
   });
 });
