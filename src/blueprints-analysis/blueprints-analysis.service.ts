@@ -51,10 +51,7 @@ export class BlueprintsAnalysisService {
       currentStates = newStates.slice(0, this.maxStates); // Limit state space to avoid combinatorial explosion
     }
 
-    return (
-      blueprint.index *
-      currentStates[0].resources[algorithmConfig?.max_index ?? 4]
-    );
+    return blueprint.index * currentStates[0].resources[this.maxRessourceIndex];
   }
 
   // Sort by most diamonds, then robots, then resources
