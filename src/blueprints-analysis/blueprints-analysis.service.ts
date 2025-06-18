@@ -1,11 +1,29 @@
 import { Injectable } from '@nestjs/common';
-import { Blueprint } from '../models/blueprint';
-import { State } from '../models/state';
+import { Blueprint } from './models/blueprint';
+import { State } from './models/state';
 import { BlueprintDto } from '../blueprints/dto/BlueprintDto';
+import { ConfigService } from '@nestjs/config';
+import { AlgorithmConfig } from '../config/configuration';
 
 @Injectable()
 export class BlueprintsAnalysisService {
+  private readonly maxRessourceIndex: number;
+  private readonly ticks: number;
+  private readonly maxStates: number;
+
+  constructor(private readonly configService: ConfigService) {
+    const algorithmConfig =
+      this.configService.get<AlgorithmConfig>('algorithm');
+
+    this.maxRessourceIndex = algorithmConfig?.max_index ?? 4;
+    this.ticks = algorithmConfig?.ticks ?? 24;
+    this.maxStates = algorithmConfig?.max_states ?? 1000;
+  }
+
   testBlueprint(blueprint_dto: BlueprintDto): number {
+    const algorithmConfig =
+      this.configService.get<AlgorithmConfig>('algorithm');
+
     let currentStates: State[] = [new State()];
     let previousStates: State[] = [];
 
@@ -16,7 +34,7 @@ export class BlueprintsAnalysisService {
 
     const robots = blueprint.robots;
 
-    for (let i = 0; i < 24; i++) {
+    for (let i = 0; i < this.ticks; i++) {
       previousStates = [...currentStates];
       const newStates: State[] = [];
 
@@ -29,17 +47,21 @@ export class BlueprintsAnalysisService {
       }
 
       newStates.forEach((state) => state.mineResources());
-      newStates.sort(this.sortFunction);
-      const MAX_STATES = 1000; // Limit state space to avoid combinatorial explosion
-      currentStates = newStates.slice(0, MAX_STATES);
+      newStates.sort((a, b) => this.sortFunction(a, b));
+      currentStates = newStates.slice(0, this.maxStates); // Limit state space to avoid combinatorial explosion
     }
 
-    return blueprint.index * currentStates[0].resources[4];
+    return (
+      blueprint.index *
+      currentStates[0].resources[algorithmConfig?.max_index ?? 4]
+    );
   }
 
   // Sort by most diamonds, then robots, then resources
   private sortFunction(a: State, b: State): number {
-    const diamondsDiff = b.getResource(4) - a.getResource(4);
+    const diamondsDiff =
+      b.getResource(this.maxRessourceIndex) -
+      a.getResource(this.maxRessourceIndex);
     if (diamondsDiff != 0) return diamondsDiff;
     for (let i = a.robots.length - 1; i >= 0; i--) {
       const diff: number = b.robots[i] - a.robots[i];

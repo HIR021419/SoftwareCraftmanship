@@ -20,7 +20,7 @@ export interface AppConfig {
 export interface AlgorithmConfig {
   ticks: number;
   max_states: number;
-  diamond_index: number;
+  max_index: number;
 }
 
 export interface FilesConfig {

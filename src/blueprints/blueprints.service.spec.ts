@@ -1,8 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { BlueprintsService } from './blueprints.service';
 import { ParserService } from '../parser/parser.service';
-import { Blueprint } from '../models/blueprint';
-import { State } from '../models/state';
+import { Blueprint } from '../blueprints-analysis/models/blueprint';
+import { State } from '../blueprints-analysis/models/state';
 
 describe('BlueprintsService', () => {
   let service: BlueprintsService;
