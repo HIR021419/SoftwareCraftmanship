@@ -22,13 +22,13 @@ export class State {
   }
 
   toString(): string {
-    let res = "robots "
+    let res = 'robots ';
     for (let i = 0; i < this.robots.length; i++) {
-      res += `${i}: ${this.robots[i]}; `
+      res += `${i}: ${this.robots[i]}; `;
     }
-    res += "\nresources "
+    res += '\nresources ';
     for (let i = 0; i < this.resources.length; i++) {
-      res += `${i}: ${this.resources[i]}; `
+      res += `${i}: ${this.resources[i]}; `;
     }
     return res;
   }

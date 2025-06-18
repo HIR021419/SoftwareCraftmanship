@@ -25,7 +25,7 @@ export class ResponseDto {
   }
 
   asString() {
-    let res = ""
+    let res = '';
     for (const result of this.results) {
       res += `Blueprint ${result.id}: ${result.quality}\n`;
     }

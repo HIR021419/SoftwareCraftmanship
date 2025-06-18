@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { ParseBlueprintsInputDto } from './dto/parse-blueprints-input.dto';
 import { BlueprintDto } from '../blueprints/dto/BlueprintDto';
-import { ResourceType } from './resource-type.enum'; // See below
+
 import { RobotCostParser } from './robot-cost.parser'; // See below
 
 @Injectable()
@@ -19,6 +19,8 @@ export class ParserService {
         blueprints.push(new BlueprintDto(index, robotCosts));
       } catch (err) {
         throw new BadRequestException(
+          // Error always has message attribute
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
           `Invalid blueprint input: ${err.message}`,
         );
       }
